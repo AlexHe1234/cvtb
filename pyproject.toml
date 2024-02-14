@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cvtb"
+version = "0.0.1"
+authors = [
+  { name="Guangzhao He", email="alexhe2000@zju.edu.cn" },
+]
+description = "Commonly used research tools"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/AlexHe1234/cvtb"
+Issues = "https://github.com/AlexHe1234/cvtb/issues"
