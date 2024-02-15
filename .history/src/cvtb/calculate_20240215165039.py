@@ -1,8 +1,8 @@
 import numpy as np
 
 
-# lift single image points into camera space 3d points WITHOUT scale
-def lift_vanilla(
+# lift image points into camera space 3d points
+def lift(
         k: np.ndarray,    # [3, 3] intrinsic matrix
         img: np.ndarray,  # [H, W, 3] image
         dpt: np.ndarray,  # [H, W] depth
@@ -22,4 +22,23 @@ def lift_vanilla(
     pixel_coords_3d = masked_pixel_coords @ inverse_mat.T
 
     pixel_coords_3d = pixel_coords_3d / np.linalg.norm(pixel_coords_3d, axis=-1, keepdims=True)
-    return pixel_coords_3d * masked_dpt[:, None]
+    
+    
+
+if __name__ == '__main__':
+    import cv2
+
+    k = np.array([[517.,   0., 320.],
+                  [  0., 517., 240.],
+                  [  0.,   0.,   1.]])
+    img_path = '/home/idarc/hgz/datasets/killing_fusion/Alex/color_000000.png'
+    dpt_path = '/home/idarc/hgz/datasets/killing_fusion/Alex/depth_000000.png'
+
+    img = cv2.cvtColor(cv2.imread(img_path, cv2.IMREAD_UNCHANGED), cv2.COLOR_BGR2RGB)
+    dpt = cv2.imread(dpt_path, cv2.IMREAD_ANYDEPTH).astype(np.float32)
+
+
+    msk = np.ones_like(dpt, dtype=bool)
+
+    pcd = lift(k, img, dpt, msk)
+
