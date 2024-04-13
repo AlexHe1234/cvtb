@@ -2,15 +2,23 @@ import numpy as np
 from .utils.vis_utils import *
      
         
-def pcd(point_clouds,  # F, N, 3
-        fps=24,
+def pcd(pcd,  # F, N, 3 or N, 3
         color=None,
-        point_size=5):
-    player = Canvas(point_clouds=point_clouds,
-                     fps=fps,
-                     color=color,
-                     point_size=point_size)
-    player.show(run=True)
+        radius=5,
+        fps=24):
+    assert len(pcd.shape) == 2 or len(pcd.shape) == 3
+    
+    if color is None:
+        color = generate_gradient_color_from_coords(pcd)
+        
+    if len(pcd.shape) == 2:
+        pcd_static(pcd, color, radius)
+    else:
+        player = Canvas(point_clouds=pcd,
+                        fps=fps,
+                        color=color,
+                        point_size=radius)
+        player.show(run=True)
 
 
 def pcd_demo(num_points=1000,
@@ -25,16 +33,19 @@ def pcd_demo(num_points=1000,
     pcd(point_clouds_sequence, 
          fps=24, 
          color=generate_gradient_color_from_coords(pcd_init),
-         point_size=point_size)
+         radius=point_size)
         
         
-def pcd_static(point_clouds,  # N, 3 
+def pcd_static(pcd,  # N, 3 
                color=None,  # N, 3
-               point_size=5):
-    player = Canvas(point_clouds=point_clouds[None],
-                     fps=1.,
-                     color=color[None] if color is not None else None,
-                     point_size=point_size)
+               radius=5):
+    if color is None:
+        color = generate_gradient_color_from_coords(pcd)
+    
+    player = Canvas(point_clouds=pcd[None],
+                    fps=1.,
+                    color=color[None] if color is not None else None,
+                    point_size=radius)
     player.show(run=True)
     
 
