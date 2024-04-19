@@ -128,62 +128,6 @@ class Canvas(app.Canvas):
         self.current_frame += 1
         self.current_frame %= len(self.point_clouds)
         self.update()
-
-
-def hsv_to_rgb_opencv(hsv_array):
-    # Ensure that the input array has the correct shape (N, 3)
-    assert hsv_array.shape[1] == 3, "Input array must have shape (N, 3)"
-    # Convert HSV array to RGB array using OpenCV
-    hsv_array_uint8 = (hsv_array * 255).astype(np.uint8)  # Convert to uint8
-    rgb_array_uint8 = cv2.cvtColor(hsv_array_uint8[None], cv2.COLOR_HSV2RGB)[0]
-    # Normalize back to [0, 1]
-    rgb_array = rgb_array_uint8 / 255.0
-    return rgb_array
-
-
-# Map the 0-1 value to the Hue component in HSV
-def generate_gradient_color(value: np.ndarray,
-                            start=0.4,
-                            end=0.65,
-                            ):
-    N = value.shape[0]
-    value = (value - value.min()) / (value.max() - value.min())
-    value = start + (end - start) * value
-    hsv = np.ones((N, 3), dtype=np.float32)
-    hsv[:, 0] *= value    
-    rgb = hsv_to_rgb_opencv(hsv)
-
-    return rgb
-
-
-def generate_gradient_color_from_coords(pcd: np.ndarray, 
-                                        start=0.4, 
-                                        end=0.65, 
-                                        use_index: bool = False, 
-                                        use_z_axis: bool = True):
-    # use_index would simply use index for coloring while False analysis point direction and use that
-    if len(pcd.shape) == 2:
-        N = pcd.shape[0]
-    elif len(pcd.shape) == 3:
-        N = pcd.shape[1]
-        pcd = pcd[0]
-    else:
-        raise ValueError(f'Why does point cloud has shape {pcd.shape}')
-    
-    if use_index:
-        return generate_gradient_color(np.arange(N), start=start, end=end)
-    else:
-        if not use_z_axis:
-            # get main direction est.
-            center = pcd.mean(axis=0)
-            print('Finding main direction, this could be time consuming')
-            *_, v = np.linalg.svd(pcd - center)
-            vec = v[0]
-        else:
-            vec = np.array([0., 0., 1.])
-        align_value = pcd @ vec.T
-        align_ordering = np.argsort(np.argsort(align_value))
-        return generate_gradient_color(align_ordering.astype(np.float32), start=start, end=end)
     
 
 def generate_synthetic_point_cloud(num_points):

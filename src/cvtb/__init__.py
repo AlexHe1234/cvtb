@@ -1,7 +1,8 @@
 from . import (
+    io,
     vis, 
-    load, 
     render,
+    color,
 )
 
 from .utils import (
