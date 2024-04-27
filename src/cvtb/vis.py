@@ -1,7 +1,9 @@
 import numpy as np
-from .utils.vis_utils import *
-from .color import *
 from typing import List, Union
+
+from .tool import *
+from .color import *
+from .utils.vis_utils import *
 
 
 def pcd_static(p,  # N, 3 

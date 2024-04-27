@@ -3,11 +3,9 @@ from . import (
     vis, 
     render,
     color,
-)
-
-from .utils import (
-    vis_utils,
-    render_utils,
+    geometry,
+    tool,
+    animation,
 )
 
 from .utils.flags import *

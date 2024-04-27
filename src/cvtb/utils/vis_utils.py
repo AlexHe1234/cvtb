@@ -2,6 +2,8 @@ import numpy as np
 from vispy import app, gloo
 from vispy.util.transforms import perspective, translate, rotate
 
+from ..geometry import *
+
 
 class Canvas(app.Canvas):
 
@@ -36,6 +38,8 @@ class Canvas(app.Canvas):
                  color=None,  # (N, 3) or (F, N, 3)
                  fps=24,
                  point_size=5,  # float or (N,) or (F, N)
+                 
+                 show_directions: bool = True,
                  ):
         app.Canvas.__init__(self, keys='interactive', size=(800, 600),
                             title='Interactive Point Clouds')
@@ -68,8 +72,64 @@ class Canvas(app.Canvas):
             self.color_seq = len(self.color.shape) == 3
 
         self.init = True
-        
         self.play = True
+        
+        # aux flags
+        self.use_aux = False
+        self.aux_x = []  # these are time invariant, I hope, so N, 3
+        self.aux_r = []  # N,
+        self.aux_c = []  # N, 3
+        
+        if show_directions:
+            self.add_aux_direction()
+        
+        assert len(self.aux_x) == len(self.aux_r) and \
+            len(self.aux_r) == len(self.aux_c)
+    
+    def aux(func):
+        def wrapper(*args, **kwargs):
+            args[0].use_aux = True
+            return func(*args, **kwargs) 
+        return wrapper
+    
+    @aux
+    def add_aux_direction(self):
+        cone_angle=40.
+        cone_ratio=0.8
+        length_ratio=0.1
+        num_stride=10
+        num_points=100
+        
+        x_arrow = generate_arrow(np.array([0., 0., 0.]),
+                                 np.array([1., 0., 0.]),
+                                 cone_angle=cone_angle,
+                                 cone_ratio=cone_ratio,
+                                 length_ratio=length_ratio,
+                                 num_stride=num_stride,
+                                 num_points=num_points)
+        y_arrow = generate_arrow(np.array([0., 0., 0.]),
+                                 np.array([0., 1., 0.]),
+                                 cone_angle=cone_angle,
+                                 cone_ratio=cone_ratio,
+                                 length_ratio=length_ratio,
+                                 num_stride=num_stride,
+                                 num_points=num_points)
+        z_arrow = generate_arrow(np.array([0., 0., 0.]),
+                                 np.array([0., 0., 1.]),
+                                 cone_angle=cone_angle,
+                                 cone_ratio=cone_ratio,
+                                 length_ratio=length_ratio,
+                                 num_stride=num_stride,
+                                 num_points=num_points)
+        
+        arrows = np.concatenate([x_arrow, y_arrow, z_arrow], axis=0).astype(np.float32)
+        arrows_color = np.concatenate([np.ones_like(x_arrow) * np.array([1., 0.2, 0.2]),
+                                       np.ones_like(y_arrow) * np.array([0.2, 1., 0.2]),
+                                       np.ones_like(z_arrow) * np.array([0.2, 0.2, 1.])], axis=0).astype(np.float32)
+        
+        self.aux_x.append(arrows)
+        self.aux_r.append(np.ones(arrows.shape[0], dtype=np.float32) * 5.)
+        self.aux_c.append(arrows_color)
 
     def get_point_size(self):
         # return N floats
@@ -92,13 +152,41 @@ class Canvas(app.Canvas):
                 return self.color[self.current_frame]
         else:
             return np.ones_like(self.point_clouds[self.current_frame])
+        
+    def get_aux_input(self):
+        ret_x = []
+        ret_r = []
+        ret_c = []
+        
+        for i in range(len(self.aux_x)):
+            ret_x.append(self.aux_x[i])
+            ret_r.append(self.aux_r[i])
+            ret_c.append(self.aux_c[i])
+            
+        ret_x = np.concatenate(ret_x, axis=0)
+        ret_r = np.concatenate(ret_r, axis=0)
+        ret_c = np.concatenate(ret_c, axis=0)
+        
+        return ret_x, ret_r, ret_c
 
     def on_draw(self, event):
         gloo.clear(color='black', depth=True)
         current_point_cloud = self.point_clouds[self.current_frame]
-        self.program['position'] = current_point_cloud.astype(np.float32)
-        self.program['radius'] = self.get_point_size().astype(np.float32)
-        self.program['color_in'] = self.get_point_color().astype(np.float32)
+        
+        x = current_point_cloud.astype(np.float32)
+        r = self.get_point_size().astype(np.float32)
+        c = self.get_point_color().astype(np.float32)
+        
+        if self.use_aux:
+            x_, r_, c_ = self.get_aux_input()
+            x = np.concatenate([x, x_], axis=0)
+            r = np.concatenate([r, r_], axis=0)
+            c = np.concatenate([c, c_], axis=0)
+        
+        self.program['position'] = x
+        self.program['radius'] = r
+        self.program['color_in'] = c
+         
         self.program.draw('points')
 
     def on_resize(self, event):
@@ -136,7 +224,3 @@ class Canvas(app.Canvas):
             self.update()
         else:
             pass
-    
-
-def generate_synthetic_point_cloud(num_points):
-    return np.random.rand(num_points, 3) * 2 - 1
