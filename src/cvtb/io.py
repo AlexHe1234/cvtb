@@ -1,5 +1,4 @@
 import numpy as np
-import open3d as o3d
 
 
 def pcd_obj(file_path):
@@ -17,6 +16,7 @@ def pcd(file_path):  # return N, 3 pcd
     if '.obj' in file_path:
         return pcd_obj(file_path)
     if '.ply' in file_path:
+        import open3d as o3d
         return np.asarray(o3d.io.read_point_cloud(file_path).points)
     if '.npy' in file_path:
         return np.load(file_path)

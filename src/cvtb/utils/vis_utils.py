@@ -1,4 +1,3 @@
-import cv2
 import numpy as np
 from vispy import app, gloo
 from vispy.util.transforms import perspective, translate, rotate
@@ -69,6 +68,8 @@ class Canvas(app.Canvas):
             self.color_seq = len(self.color.shape) == 3
 
         self.init = True
+        
+        self.play = True
 
     def get_point_size(self):
         # return N floats
@@ -123,11 +124,18 @@ class Canvas(app.Canvas):
         self.view = translate((0, 0, -5 - 0.1 * self.wheel_pos))
         self.program['view'] = self.view
         self.update()
+        
+    def on_key_press(self, event):
+        if event.key == 'Space':
+            self.play = not self.play
 
     def on_timer(self, event):
-        self.current_frame += 1
-        self.current_frame %= len(self.point_clouds)
-        self.update()
+        if self.play:
+            self.current_frame += 1
+            self.current_frame %= len(self.point_clouds)
+            self.update()
+        else:
+            pass
     
 
 def generate_synthetic_point_cloud(num_points):

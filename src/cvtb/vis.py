@@ -62,6 +62,8 @@ def pcds(ps: List,  # list of Ni, 3 or F, Ni, 3 for i in list index
             cs = cs_
         p = np.concatenate(ps, axis=0)
         c = np.concatenate(cs, axis=0)
+        p = p.copy()
+        c = c.copy()
         pcd_static(p, c, r=rs)
     else:  # dynamic
         raise NotImplementedError()

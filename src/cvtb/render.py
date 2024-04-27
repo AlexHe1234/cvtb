@@ -44,6 +44,7 @@ def mesh(
     
     flag: int,
 ) -> np.ndarray:
+    
     if flag == RENDER_MESH_SHAPE:
         raise NotImplementedError()
     elif flag == RENDER_MESH_DEPTH:

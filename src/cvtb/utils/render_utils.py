@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-import open3d as o3d
 from typing import Union
 
 
@@ -25,6 +24,7 @@ def pcd_shape_vanilla(
 
     if isinstance(pcd, str):
         if '.ply' in pcd:
+            import open3d as o3d
             mesh = o3d.io.read_point_cloud(pcd)
             pts = np.asarray(mesh.points)
         elif '.npy' in pcd:
