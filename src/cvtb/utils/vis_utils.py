@@ -39,7 +39,7 @@ class Canvas(app.Canvas):
                  fps=24,
                  point_size=5,  # float or (N,) or (F, N)
                  
-                 show_directions: bool = True,
+                 show_directions: bool = False,
                  ):
         app.Canvas.__init__(self, keys='interactive', size=(800, 600),
                             title='Interactive Point Clouds')

@@ -20,5 +20,9 @@ vis.pcds([points0, points1, points2],
 vis.pcds_demo()
 ```
 
-## color utility
+## color
+```python
+from cvtb import color
 
+color.gene
+```

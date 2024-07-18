@@ -8,14 +8,16 @@ from .utils.vis_utils import *
 
 def pcd_static(p,  # N, 3 
                c=None,  # N, 3
-               r=5):
+               r=5,
+               show_dir=False):
     if c is None:
         c = generate_gradient_color(p)
     
     player = Canvas(point_clouds=p[None],
                     fps=1.,
                     color=c[None] if c is not None else None,
-                    point_size=r)
+                    point_size=r,
+                    show_directions=show_dir)
     player.show(run=True)
      
         
@@ -41,7 +43,9 @@ def pcd(p,  # F, N, 3 or N, 3
 def pcds(ps: List,  # list of Ni, 3 or F, Ni, 3 for i in list index
          cs: List = None,  # list of Ni, 3 or F, Ni, 3 or None for i in list index
          rs: Union[int, List] = 5,  # list of Ni, or F, Ni for i in list index
-         fps: int = 24):
+         fps: int = 24,
+         overlay: bool = True,
+         overlay_gap: float = 2.):
     num_pcd = len(ps)
     
     assert len(ps) == len(cs) if cs is not None else True
@@ -62,6 +66,8 @@ def pcds(ps: List,  # list of Ni, 3 or F, Ni, 3 for i in list index
             for i, p in enumerate(ps):
                 cs_.append(np.broadcast_to(cs[i].reshape(3), p.shape))
             cs = cs_
+        if not overlay:
+            ps = place_pcds(ps, overlay_gap)
         p = np.concatenate(ps, axis=0)
         c = np.concatenate(cs, axis=0)
         p = p.copy()

@@ -5,7 +5,7 @@ from . import (
     color,
     geometry,
     tool,
-    animation,
 )
 
 from .utils.flags import *
+from .lib import *
