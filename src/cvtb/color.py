@@ -15,7 +15,9 @@ def hsv_to_rgb_opencv(hsv_array):
 
 
 # generate #num of as contrast as possible colors  
-def generate_discrete_color(num: int):
+def generate_discrete_color(num: int, fixed: bool = True):
+    if fixed:
+        np.random.seed(42)
     hue = np.arange(num) / num
     hue += np.random.uniform()
     hue %= 1
