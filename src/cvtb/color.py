@@ -34,7 +34,8 @@ def _generate_gradient_color(value: np.ndarray,
     value = (value - value.min()) / (value.max() - value.min())
     value = start + (end - start) * value
     hsv = np.ones((N, 3), dtype=np.float32)
-    hsv[:, 0] *= value    
+    # breakpoint()
+    hsv[:, 0] = hsv[:, 0] * value
     rgb = hsv_to_rgb_opencv(hsv)
 
     return rgb
@@ -70,7 +71,7 @@ def generate_gradient_color(pcd: np.ndarray,
             elif use_axis == 'y':
                 vec = np.array([0., 1., 0.])
             elif use_axis == 'z':
-                vec = np.array([1., 0., 0.])
+                vec = np.array([0., 0., 1.])
             else:
                 raise ValueError(f'Use axis got an unexpected value')
         align_value = pcd @ vec.T
