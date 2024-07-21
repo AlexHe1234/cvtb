@@ -6,7 +6,7 @@ from trimesh.transformations import quaternion_matrix, translation_matrix
 
 def make_ellipsoid_mesh(
     scaling: Union[np.ndarray, List[float]],  # sx,sy,sz half-axis length
-    rotation: Union[np.ndarray, List[float]],  # q0,q1,q2,q3 quaternion
+    rotation: Union[np.ndarray, List[float]],  # q0,q1,q2,q3 quaternion or 3,3 rotation matrix
     center: Union[np.ndarray, List[float]],  # x,y,z center
     color: Union[np.ndarray, List[float]],  # r,g,b union color for the mesh
     subdivision: int = 2,
@@ -19,7 +19,10 @@ def make_ellipsoid_mesh(
     ellipsoid.apply_scale(scaling)
 
     # rotate it
-    rot_matrix = quaternion_matrix(rotation)
+    if len(rotation) == 4:
+        rot_matrix = quaternion_matrix(rotation)
+    else:
+        rot_matrix = np.asarray(rotation)
     ellipsoid.apply_transform(rot_matrix)
     
     # recenter it
